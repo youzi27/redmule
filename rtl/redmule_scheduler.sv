@@ -211,7 +211,8 @@ module redmule_scheduler
     end else if(clear_i) begin
       x_shift_offs_q <= '0;
     end else if (flgs_x_buffer_i.full && flgs_x_buffer_i.empty) begin
-      x_shift_offs_q <= x_shift_cnt_q + x_shift_offs_q;
+      // saturate at H-1 (check on the first WAIT after the coincidence) instead of wrapping around
+      x_shift_offs_q <= (x_shift_cnt_q + x_shift_offs_q > H-1) ? H-1 : x_shift_cnt_q + x_shift_offs_q;
     end
   end
 
