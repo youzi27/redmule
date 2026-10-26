@@ -271,7 +271,10 @@ always_ff @(posedge clk_i or negedge rst_ni) begin : buf_write_counter
       if ((current_state == PAD_EMPTY || current_state == FAST_FILL && ~first_block) && ctrl_i.h_shift)
         buf_write_cnt <= buf_write_cnt + 1;
       else if (ctrl_i.pad_setup)
-        buf_write_cnt <= ctrl_i.slots;
+        // The first fill can write at most the two H-wide slots of the X buffer.
+        // A pad holds slots = D = H*(NumPipeRegs+1) columns, which is more than 2*H
+        // for NumPipeRegs > 1; the remaining columns are written in the FILL state.
+        buf_write_cnt <= (ctrl_i.slots < 2*H) ? ctrl_i.slots : 2*H;
     end
   end
 end

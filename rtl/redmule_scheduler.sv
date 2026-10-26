@@ -183,7 +183,9 @@ module redmule_scheduler
   logic small_n_promoted_x;
   assign small_n_promoted_x = (x_config.n_size <= H);
   assign cntrl_x_buffer_o.height = x_cols_iter_q == x_config.x_cols_iter-1 && x_config.x_cols_lftovr != '0 ? x_config.x_cols_lftovr : D;
-  assign cntrl_x_buffer_o.slots  = small_n_promoted_x ? D
+  // The promoted N-tile is MinimumSizeNFactor*H deep (the W-row loop length set by the tiler),
+  // which equals D only for NumPipeRegs == 1.
+  assign cntrl_x_buffer_o.slots  = small_n_promoted_x ? MinimumSizeNFactor*H
                                  : (x_cols_iter_q == x_config.x_cols_iter-1 && x_config.x_cols_lftovr != '0 ? x_config.x_buffer_slots : D);
   assign cntrl_x_buffer_o.width  = x_rows_iter_q == x_config.x_rows_iter-1 && x_config.x_rows_lftovr != '0 ? x_config.x_rows_lftovr : W;
 
