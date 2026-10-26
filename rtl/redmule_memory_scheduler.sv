@@ -40,7 +40,7 @@ module redmule_memory_scheduler
 
   logic [15:0]        w_iters_d, w_iters_q;
 
-  logic [15:0]        tot_x_read_d, tot_x_read_q;
+  logic [31:0]        tot_x_read_d, tot_x_read_q;
 
   logic [$clog2(W):0] x_rows_lftover_d, x_rows_lftover_q;
 
