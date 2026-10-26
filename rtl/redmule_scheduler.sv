@@ -374,11 +374,15 @@ module redmule_scheduler
   // N index >= real n_size are gated to zero. Since real N <= H, all valid rows fall in
   // the first Height-deep buffer pass (w_rows_iter_q < H, valid depth = n_size); the second pass
   // (w_rows_iter_q >= H) is fully invalid (valid depth = 0).
+  // When N > Height and N is not a multiple of Height, the W-row loop is rounded up to
+  // w_rows_iter = ceil(N/H)*H, so its whole last Height-deep pass (rows w_rows_iter-H ..
+  // w_rows_iter-1) is the partial one: only its first w_rows_lftovr rows are W rows, the
+  // others are read past the end of W and must be zeroed here, whatever NumPipeRegs is.
   logic small_n_promoted;
   assign small_n_promoted = (w_config.n_size <= H);
   assign cntrl_w_buffer_o.height = small_n_promoted
                                  ? (w_rows_iter_q < H ? w_config.n_size[$clog2(MaxDim)-1:0] : '0)
-                                 : (w_rows_iter_q >= w_config.w_rows_iter-(NumPipeRegs+1) && w_config.w_rows_lftovr != '0 ? w_config.w_rows_lftovr : H);
+                                 : (w_rows_iter_q >= w_config.w_rows_iter-H && w_config.w_rows_lftovr != '0 ? w_config.w_rows_lftovr : H);
   assign cntrl_w_buffer_o.width  = w_cols_iter_q == w_config.w_cols_iter-1 && w_config.w_cols_lftovr != '0 ? w_config.w_cols_lftovr : D;
 
   assign cntrl_w_buffer_o.load  = current_state == LOAD_W && ~stall_engine && ~w_done;
