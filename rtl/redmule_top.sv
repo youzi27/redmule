@@ -156,7 +156,7 @@ end
 
 tc_clk_gating i_acc_clock_gating (
   .clk_i     ( clk_i                                                   ),
-  .en_i      ( dec_config_valid | ~config_fifo_empty | busy_o | busy_q ),
+  .en_i      ( dec_config_valid | ~config_fifo_empty | busy_o | busy_q | target_clear ),
   .test_en_i ( '0                                                      ),
   .clk_o     ( clk_acc                                                 )
 );
