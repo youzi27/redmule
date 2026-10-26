@@ -63,6 +63,11 @@ localparam int unsigned EW  = `HCI_SIZE_GET_EW(tcdm);
 // Cast in/out modules operate on misaligned DataW
 localparam int unsigned CastDataW = DataW + (MisalignedAccessSupport ? 32 : 0);
 
+// Width of the transfer counters of the HCI sources/sink. They end a stream when the counter equals the
+// 32-bit tot_len (w_tot_len, yz_tot_len). With the HCI default of 16 bits the counter wraps before it can
+// reach a tot_len of 2^16 or more (e.g. the W stream of a 128x128x128 GEMM on Height = Width = 4).
+localparam int unsigned StreamTransCnt = 32;
+
 // Non-ECC variant of tcdm size params, used for all internal (non-ECC) interfaces
 localparam hci_size_parameter_t `HCI_SIZE_PARAM(ldst_tcdm) = '{
   DW:  `HCI_SIZE_GET_DW(tcdm),
@@ -283,6 +288,7 @@ end
 // Sink module that turns the incoming Z stream into TCDM.
 `HCI_INTF_EXPLICIT_PARAM(zstream2cast, clk_i, `HCI_SIZE_PARAM(ldst_tcdm));
 hci_core_sink         #(
+  .TRANS_CNT           ( StreamTransCnt          ),
   .MISALIGNED_ACCESSES ( MisalignedAccessSupport ),
   .`HCI_SIZE_PARAM(tcdm) ( `HCI_SIZE_PARAM(ldst_tcdm) )
 ) i_stream_sink        (
@@ -526,6 +532,7 @@ for (genvar i = 0; i < NumStreamSources; i++) begin: gen_tcdm2stream
   end
 
   hci_core_source       #(
+    .TRANS_CNT             ( StreamTransCnt          ),
     .MISALIGNED_ACCESSES   ( MisalignedAccessSupport ),
     .`HCI_SIZE_PARAM(tcdm) ( `HCI_SIZE_PARAM(ldst_tcdm) ),
     .RESP_FIFO_DEPTH       ( EnableReordering ? Height*(NumPipeRegs+1) : 0 )
