@@ -190,9 +190,9 @@ module redmule_scheduler
   /******************************
    *      X Shift Control       *
    ******************************/
-  logic [$clog2(H-1)-1:0] x_shift_cnt_d, x_shift_cnt_q;
+  logic [$clog2(H)-1:0]   x_shift_cnt_d, x_shift_cnt_q;
   logic                   x_shift_cnt_en;
-  logic [$clog2(H-1)-1:0] x_shift_offs_q;
+  logic [$clog2(H)-1:0]   x_shift_offs_q;
 
   always_ff @(posedge clk_i or negedge rst_ni) begin : x_shift_counter
     if(~rst_ni) begin
