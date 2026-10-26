@@ -173,7 +173,9 @@ module redmule_scheduler
     end
   end
 
-  assign x_done_en = /*flgs_streamer_i.x_stream_source_flags.ready_start &&*/ x_rows_iter_en && x_rows_iter_q == x_config.x_rows_iter-1 && x_w_iters_q == x_config.w_cols_iter-1 && x_cols_iter_q == x_config.x_cols_iter-1;
+  // x_done_en pops i_x_config_fifo. Once x_done is set, the iterators are frozen at 0 and x_config is
+  // the next FIFO slot (stale when the FIFO is empty), so a further X-buffer empty pulse must not pop again.
+  assign x_done_en = /*flgs_streamer_i.x_stream_source_flags.ready_start &&*/ ~x_done && x_rows_iter_en && x_rows_iter_q == x_config.x_rows_iter-1 && x_w_iters_q == x_config.w_cols_iter-1 && x_cols_iter_q == x_config.x_cols_iter-1;
 
   // For N <= Height, the "internal N" is promoted to a full N-tile (MinimumSizeN steps) by the tiler
   // (see redmule_tiler.sv). The X buffer must then iterate a full D-deep tile so its refill / M-block
